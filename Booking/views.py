@@ -29,4 +29,5 @@ def register(request):
 
 def detail_products(request,product_id):
     product=Product.objects.get(id=product_id)
-    return render(request,"main/detail_product.html",{'product':product})
+    categories=Category.objects.filter(title=product.category.title)
+    return render(request,"main/detail_product.html",{'product':product,'categories':categories})

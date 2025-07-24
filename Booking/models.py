@@ -40,7 +40,7 @@ class District(models.Model):
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,blank=True, null=True)
     title = models.CharField(max_length=255)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,related_name='products')
     area = models.CharField(max_length=100)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     district = models.ForeignKey(District, on_delete=models.CASCADE)
