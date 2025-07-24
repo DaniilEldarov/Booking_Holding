@@ -1,11 +1,10 @@
 from django.db import models
-
 # Create your models here.
 
 class User(models.Model):
     username = models.CharField(max_length=150)
     email = models.EmailField()
-    avatar = models.ImageField(upload_to='avatars/')
+    avatar = models.ImageField(upload_to='media/avatars')
     password = models.CharField(max_length=128)
     role = models.CharField(max_length=50)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
@@ -22,6 +21,14 @@ class Category(models.Model):
     title = models.CharField(max_length=100)
     parent_category = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
+    def __str__(self):
+        ancestors = []
+        category = self
+        while category:
+            ancestors.append(category.title)
+            category = category.parent_category
+        return ' > '.join(reversed(ancestors))
+
 class City(models.Model):
     title = models.CharField(max_length=100)
 
@@ -30,7 +37,7 @@ class District(models.Model):
     title = models.CharField(max_length=100)
 
 class Product(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,blank=True, null=True)
     title = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     area = models.CharField(max_length=100)
@@ -39,12 +46,13 @@ class Product(models.Model):
     geo = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
-    promo_video = models.URLField(blank=True, null=True)
+    promo_video = models.FileField(blank=True, null=True,upload_to='media/videos')
     is_active = models.BooleanField(default=True)
+    cover = models.ImageField(upload_to='media/images')
 
 class Image(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    file = models.ImageField(upload_to='products/')
+    file = models.ImageField(upload_to='media/images')
     is_main = models.BooleanField(default=False)
 
 class Feedback(models.Model):
