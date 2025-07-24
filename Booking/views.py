@@ -8,9 +8,10 @@ from django.contrib.auth.forms import UserCreationForm
 # Create your views here.
 def main_page(request):
     products=Product.objects.all()
+    categories=Category.objects.all()
     return render(request,
     'main/index.html',
-    {'products':products}
+    {'products':products,'categories':categories}
     )
 
 def register(request):

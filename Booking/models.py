@@ -20,6 +20,7 @@ class Card(models.Model):
 class Category(models.Model):
     title = models.CharField(max_length=100)
     parent_category = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
+    cover = models.ImageField(upload_to='media/categories')
 
     def __str__(self):
         ancestors = []
