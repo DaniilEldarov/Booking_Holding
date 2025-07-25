@@ -1,3 +1,5 @@
+from itertools import product
+
 from django.shortcuts import render
 from .models import *
 from django.contrib.auth.models import User
@@ -8,7 +10,25 @@ from django.contrib.auth.forms import UserCreationForm
 # Create your views here.
 def main_page(request):
     products=Product.objects.all()
-    categories=Category.objects.all()
+    categories=Category.objects.filter(parent_category__isnull=True)
+    if request.method == 'POST':
+        category_name=request.POST['category_name']
+        searched_category=Category.objects.filter(title=category_name).first()
+        categories=Category.objects.filter(parent_category=searched_category)
+        products=Product.objects.filter(category=searched_category)
+
+        price_filter=request.POST['price_filter']
+        if price_filter=="<1000":
+            price_product_filter=Product.objects.filter(price__gte=1000,is_active=True)[8]
+        elif price_filter==">1000":
+            price_product_filter=Product.objects.filter(price__lt=1000,is_active=True)[8]
+        else:
+            price_product_filter = Product.objects.filter(price__lt=1000,is_active=True)[8]
+        return render(request,
+    'main/index.html',
+    {'categories':categories,
+     'products':products,'price_product_filter':price_product_filter}
+    )
     return render(request,
     'main/index.html',
     {'products':products,'categories':categories}
