@@ -1,17 +1,9 @@
 from django.db import models
 # Create your models here.
-
-class User(models.Model):
-    username = models.CharField(max_length=150)
-    email = models.EmailField()
-    avatar = models.ImageField(upload_to='media/avatars')
-    password = models.CharField(max_length=128)
-    role = models.CharField(max_length=50)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    new_field = models.CharField(max_length=255, blank=True, null=True)  # Adjust name
+from user.models import MyUser
 
 class Card(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255)
     number = models.CharField(max_length=16)
     cvv = models.CharField(max_length=4)
@@ -38,7 +30,7 @@ class District(models.Model):
     title = models.CharField(max_length=100)
 
 class Product(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,blank=True, null=True)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE,related_name='products')
     area = models.PositiveSmallIntegerField()
@@ -57,24 +49,23 @@ class Image(models.Model):
     is_main = models.BooleanField(default=False)
 
 class Feedback(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE,related_name='feedback')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    rating = models.PositiveSmallIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 class FeedbackResponse(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE,)
     feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 class PaymentOrder(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

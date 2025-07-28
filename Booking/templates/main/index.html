@@ -1,6 +1,25 @@
 {% extends 'base.html' %}
 {%load static%}
 {% block content%}
+
+<style>
+.heart-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10;
+    font-size: 24px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 6px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+.heart-icon.active i {
+    color: red;
+}
+</style>
     <!-- Start Banner Hero -->
     <div class="banner-wrapper bg-light">
         <div id="index_banner" class="banner-vertical-center-index container-fluid pt-5">
@@ -97,11 +116,11 @@
     <section class="py-5 mb-5">
         <div class="container">
             <div class="recent-work-header row text-center pb-5">
-                <h2 class="col-md-6 m-auto h2 semi-bold-600 py-5">Categories</h2>
+                <h2 class="col-md-6 m-auto h2 semi-bold-600 py-5">You are in category:{{in_category}}</h2>
             </div>
             <div class="row gy-5 g-lg-5 mb-4">
                 {% for category in categories %}
-                <form method="POST" action="{% url 'main_page'%}">
+                <form method="POST" action="{% url 'main_page'%}" name="categories">
                     <!-- Start Recent Work -->
                     {% csrf_token %}
                     <div class="col-md-4 mb-3">
@@ -117,6 +136,7 @@
                             </div>
                         </a>
                     </div><!-- End Recent Work -->
+                </form>
 
                 {%endfor%}
 
@@ -125,52 +145,60 @@
     </section>
     <!-- End Recent Work -->
 
-
-
+    <form method="POST" action="{% url 'main_page'%}">
+        <section>
         <div class="service-tag py-5 bg-secondary">
             <div class="col-md-12">
                 <ul class="nav d-flex justify-content-center">
                     <li class="nav-item mx-lg-4">
-                        <a class="filter-btn nav-link btn-outline-primary active shadow rounded-pill text-light px-4 light-300" href="#" >All</a>
+                        <a class="filter-btn nav-link btn-outline-primary active shadow rounded-pill text-light px-4 light-300" href="#"  >All</a>
                     </li>
                     <li class="nav-item mx-lg-4">
                         <a class="filter-btn nav-link btn-outline-primary rounded-pill text-light px-4 light-300" href="#" >Price lower than 1000</a>
-                        <input type="hidden" name="product_price" value="<1000">
+                        <input type="hidden" name="filter" value="<1000">
                         <button type="submit" style="border: none; background: none;"></button>
                     </li>
                     <li class="filter-btn nav-item mx-lg-4">
                         <a class="filter-btn nav-link btn-outline-primary rounded-pill text-light px-4 light-300" href="#" >Price greater than 1000</a>
-                        <input type="hidden" name="product_price" value=">1000">
+                        <input type="hidden" name="filter" value=">1000">
                         <button type="submit" style="border: none; background: none;"></button>
                     </li>
                 </ul>
             </div>
         </div>
-        </form>
     </section>
+    </form>
 
     <section class="container overflow-hidden py-5">
         <div class="row gx-5 gx-sm-3 gx-lg-5 gy-lg-5 gy-3 pb-3 projects">
 
             <!-- Start Recent Work -->
-            {% for product in products%}
-                <div class="col-xl-3 col-md-4 col-sm-6 project ui branding">
-                    <a href="{% url 'detail_page' product.id %}" class="service-work card border-0 text-white shadow-sm overflow-hidden mx-5 m-sm-0">
-                        <img class="service card-img" src="{{product.cover.url}}" alt="Card image">
+            {% for product in products %}
+            <div class="col-xl-3 col-md-4 col-sm-6 project ui branding position-relative">
+                <div class="service-work card border-0 text-white shadow-sm overflow-hidden position-relative">
+                    <a href="{% url 'detail_page' product.id %}">
+                        <img class="service card-img" src="{{ product.cover.url }}" alt="Card image">
                         <div class="service-work-vertical card-img-overlay d-flex align-items-end">
                             <div class="service-work-content text-left text-light">
                                 <span class="btn btn-outline-light rounded-pill mb-lg-3 px-lg-4 light-300">User</span>
-                                <p class="card-text">{{product.description}}</p>
+                                <p class="card-text">{{ product.description }}</p>
                             </div>
                         </div>
                     </a>
-                </div><!-- End Recent Work -->
+
+                    <!-- Heart icon -->
+                    <div class="heart-icon {% if product.id in liked_products %}active{% endif %}"
+                         onclick="event.stopPropagation(); toggleHeart(this, {{ product.id }});">
+                        <i class="{% if product.id in liked_products %}bxs-heart{% else %}bx bx-heart{% endif %}"></i>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
+
 
         </div>
     </section>
     <!-- End Service -->
-
 
 
 
@@ -194,4 +222,15 @@
         </div>
     </section>
     <!-- End View Work -->
-{% endblock%}
+        <script>
+        function toggleHeart(element) {
+            element.classList.toggle('active');
+            const icon = element.querySelector('i');
+            if (element.classList.contains('active')) {
+                icon.classList.replace('bx-heart', 'bxs-heart');
+            } else {
+                icon.classList.replace('bxs-heart', 'bx-heart');
+            }
+        }
+        </script>
+{% endblock %}
