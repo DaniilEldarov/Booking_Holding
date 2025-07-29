@@ -189,8 +189,11 @@
                     <!-- Heart icon -->
                     <div class="heart-icon {% if product.id in liked_products %}active{% endif %}"
                          onclick="event.stopPropagation(); toggleHeart(this, {{ product.id }});">
+                        <a href="{% url 'favorite' product.id %}">
                         <i class="{% if product.id in liked_products %}bxs-heart{% else %}bx bx-heart{% endif %}"></i>
+                        </a>
                     </div>
+
                 </div>
             </div>
             {% endfor %}

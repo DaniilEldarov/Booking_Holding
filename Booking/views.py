@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm
+from user.forms import CustomUserCreationForm
 from .models import *
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
@@ -36,18 +36,6 @@ def main_page(request):
      'liked_products': liked_product_ids,}
     )
 
-def register_view(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST, request.FILES)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, 'Account created successfully and logged in')
-            return redirect('main_page')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'user/register.html', {'form': form})
-
 
 def detail_products(request,product_id):
     product=Product.objects.get(id=product_id)
@@ -59,21 +47,6 @@ def detail_products(request,product_id):
     feedbacks=Feedback.objects.filter(product=product)
     return render(request,"main/detail_product.html",{'product':product,'categories':categories,'feedbacks':feedbacks})
 
-def login_user(request):
-    if request.method == 'POST':
-        user = authenticate(email=request.POST['email'],password=request.POST['password'])
-        if user:
-            login(request, user)
-            messages.success(request, 'Account logged in')
-            return redirect('main_page')
-        else:
-            messages.error(request, 'Invalid username or password')
-    return render(request,'user/login.html',{'form':AuthenticationForm()})
-
-def logout_user(request):
-    logout(request)
-    messages.success(request, 'Logged out successfully')
-    return redirect('main_page')
 
 def comments(request):
     if request.method == 'POST':
@@ -87,12 +60,22 @@ def comments(request):
     return render(request)
 
 def favorite(request,product_id):
-    favorite_exist=Favorite.objects.filter(user=request.user ,product_id=product_id).first()
+    product=Product.objects.get(id=product_id)
+    favorite_exist=Favorite.objects.filter(user=request.user ,product=product).first()
     if favorite_exist:
         favorite_exist.delete()
     else:
         product= get_object_or_404(Product,id=product_id)
         favorite=Favorite(user=request.user,product=product)
         favorite.save()
+        print("cool")
     return redirect('main_page')
 
+def favorite_list(request):
+    if not request.user.is_authenticated:
+        messages.error(request,"You are not logged in")
+        return redirect('login')
+
+    favorites=Favorite.objects.filter(user=request.user).order_by('-id')
+
+    return render(request,'main/favorite_list.html',{'favorites':favorites})
