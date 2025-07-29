@@ -11,5 +11,9 @@
         <input type="text" id="code" name="code" required>
         <button type="submit">Verify</button>
     </form>
+
+    <!-- Resend code form/button -->
+        <p>if you want to resend password <a href="{% url 'resend_code' user.id %}">click here>></a></p>
 </div>
 {% endblock %}
+

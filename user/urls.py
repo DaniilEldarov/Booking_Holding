@@ -5,4 +5,5 @@ urlpatterns = [
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
     path('verify_code/<int:user_id>', verify_code, name='verify_code'),
+    path('resend_code/<int:user_id>',resend_code,name='resend_code'),
 ]

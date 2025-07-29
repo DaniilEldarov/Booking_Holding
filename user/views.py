@@ -48,10 +48,10 @@ def register_view(request):
     return render(request, 'user/register.html', {'form': form})
 
 def verify_code(request,user_id):
+    user = get_object_or_404(MyUser,id=user_id)
     if request.method == 'POST':
         user_input_code=request.POST['code']
-        user=MyUser.objects.get(id=user_id)
-        otp=OTP.objects.filter(code=user_input_code,user=user).first()
+        otp=OTP.objects.filter(code=user_input_code,user=user).last()
         if otp:
             if is_code_valid(otp):
                 messages.success(request, 'Your code has been verified \n You successfully logged in')
@@ -63,4 +63,22 @@ def verify_code(request,user_id):
         else:
             messages.error(request, 'Invalid code')
 
-    return render(request, 'user/verify_otp.html')
+    return render(request, 'user/verify_otp.html', {'user': user})
+
+
+def resend_code(request,user_id):
+    user = MyUser.objects.get(id=user_id)
+    code=generate_otp()
+    otp=OTP(user=user,code=code)
+    otp.save()
+    code = generate_otp()
+    OTP.objects.create(user=user,
+                       code=code)
+    send_mail(
+        "This is your temporary code from BookkingHolding",
+        f"There your code don't show this code: {code} ",
+        settings.EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False,
+    )
+    return redirect('verify_code', user_id=user.id)
