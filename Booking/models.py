@@ -49,14 +49,14 @@ class Image(models.Model):
     is_main = models.BooleanField(default=False)
 
 class Feedback(models.Model):
-    user = models.ForeignKey(MyUser, on_delete=models.CASCADE,related_name='feedback')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE,related_name='feedbacks')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='feedbacks')
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 class FeedbackResponse(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE,)
-    feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE)
+    feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE,related_name='replies')
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -68,4 +68,4 @@ class PaymentOrder(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='favorites')

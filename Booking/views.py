@@ -1,8 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
-from user.forms import CustomUserCreationForm
 from .models import *
-from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 
 
@@ -39,13 +36,9 @@ def main_page(request):
 
 def detail_products(request,product_id):
     product=Product.objects.get(id=product_id)
-    categories=Category.objects.filter(title=product.category.title)
-    if len(Feedback.objects.all())<8:
-        x=len(Feedback.objects.all())
-    else:
-        x=8
+    recomendated_products=Product.objects.filter(category=product.category,is_active=True,city=product.city).exclude(id=product.id)
     feedbacks=Feedback.objects.filter(product=product)
-    return render(request,"main/detail_product.html",{'product':product,'categories':categories,'feedbacks':feedbacks})
+    return render(request,"main/detail_product.html",{'product':product,'recomendated_products':recomendated_products,'feedbacks':feedbacks})
 
 
 def comments(request):
@@ -79,3 +72,29 @@ def favorite_list(request):
     favorites=Favorite.objects.filter(user=request.user).order_by('-id')
 
     return render(request,'main/favorite_list.html',{'favorites':favorites})
+
+
+def reply_on_comment(request,comment_id):
+    feedback=Feedback.objects.filter(id=comment_id).first()
+    if feedback:
+        if request.method == 'POST':
+            comment=request.POST['comment']
+            feedback_response=FeedbackResponse(comment=comment,user=request.user,feedback=feedback)
+            feedback_response.save()
+            messages.success(request,"Thank You for your comment")
+
+    return redirect('detail_page',product_id=feedback.product.id)
+
+def delete_comment(request,comment_id,product_id):
+    if request.method == 'POST':
+        feedback=Feedback(id=comment_id)
+        feedback.delete()
+        messages.success(request,"Thank You for your comment")
+    return redirect('detail_page',product_id=product_id)
+
+def delete_reply(request,comment_id,product_id):
+    if request.method == 'POST':
+        feedback_reply=FeedbackResponse(id=comment_id)
+        feedback_reply.delete()
+        messages.success(request,"Thank You for your comment")
+    return redirect('detail_page',product_id=product_id)

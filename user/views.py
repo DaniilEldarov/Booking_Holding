@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
+from Booking.models import Feedback, FeedbackResponse
 from .forms import CustomUserCreationForm
 from .models import *
 from django.contrib.auth import authenticate, login, logout

@@ -14,7 +14,7 @@
                     sed do eiusmod tempor incididunt ut labore et dolore magna
                     aliqua. Integer ut ipsum eu libero venenatis euismod.
                 </p>
-             </div>
+            </div>
         </div>
     </div>
     <!-- End Banner Hero -->
@@ -205,13 +205,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 ml-auto mr-auto pt-3 pb-4">
                 <p class="text-muted light-300">
-                    Ed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas
-                    accumsan lacus vel facilisis. Lorem ipsum dolor sit amet, consectetur
-                    adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                    magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                    laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                    in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.
+                    gotta give me 10 push ups
                 </p>
             </div>
         </div>
@@ -223,7 +217,7 @@
                 <h4 class="h5">Comments</h4>
             </div>
         </div>
-        {% for feedback in feedbacks %}
+        {% for feedback in product.feedbacks.all %}
             <div class="row pb-4">
                 <div class="worksingle-comment-body col-md-8 m-auto">
                     <div class="d-flex">
@@ -233,21 +227,91 @@
                         <div class="comment-body">
                             <div class="comment-header d-flex justify-content-between ms-3">
                                 <div class="header text-start">
-                                    <h5 class="h6">{{feedback.user.username}}</h5>
-                                    <p class="text-muted light-300">{{feedback.created_at}}</p>
+                                    <h5 class="h6">{{ feedback.user.username }}</h5>
+                                    <p class="text-muted light-300">{{ feedback.created_at|timesince }} ago</p>
                                 </div>
-                                <a href="#" class="text-decoration-none text-secondary"><i class='bx bxs-share me-2'></i>Reply</a>
+                                {% if request.user == feedback.user%}
+                                    <!-- 🗑️ Delete Button (only if user is owner) -->
+                                    <form method="POST" action="{% url 'delete_comment' feedback.id product.id %}" style="margin-right: 10px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                {% elif request.user.is_admin %}
+                                <form method="POST" action="{% url 'delete_comment' feedback.id product.id %}" style="margin-right: 10px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                {% endif %}
+
+                                <button
+                                  type="button"
+                                  class="text-decoration-none text-secondary reply-btn"
+                                  data-feedback-id="{{ feedback.id }}"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#replyModal"
+                                >
+                                  <i class='bx bxs-share me-2'></i>Reply
+                                </button>
                             </div>
                             <div class="footer">
                                 <div class="card-body border ms-3 light-300">
-                                    {{feedback.comment}}
+                                    {{ feedback.comment }}
                                 </div>
                             </div>
+                            {% for reply in feedback.replies.all %}
+                        <div class="card-body border ms-5 mt-3 light-300 bg-light rounded">
+                            {% if request.user == reply.user%}
+                                    <!-- 🗑️ Delete Button (only if user is owner) -->
+                                    <form method="POST" action="{% url 'delete_reply' reply.id product.id %}" style="margin-right: 10px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                            {% elif request.user.is_admin %}
+                                <form method="POST" action="{% url 'delete_comment' feedback.id product.id %}" style="margin-right: 10px;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                {% endif %}
+                            <p class="mb-1">
+                                <strong>{{ reply.user.username }}</strong>
+                                <span class="text-muted small">— {{ reply.created_at|timesince }} ago</span>
+                            </p>
+                            <p class="mb-0">{{ reply.comment }}</p>
+                        </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
-            </div><!-- End Comment -->
-            {%endfor%}
+            </div>
+        {% endfor %}
+                <!-- 🔽 Place modal here, after the loop -->
+          <div class="modal fade" id="replyModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Reply to Comment</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="replyForm" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" id="parent_id" value="">
+                    <div class="form-group">
+                      <label for="modalMessage">Your Reply</label>
+                      <textarea
+                        class="form-control form-control-lg"
+                        id="modalMessage"
+                        name="comment"
+                        rows="5"
+                        placeholder="Your reply…"
+                      ></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Send Reply</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
 
 
         <div class="row pb-4">
@@ -275,15 +339,14 @@
     </section>
     <!-- End Work Sigle -->
 
-    <!-- Start Related Post -->
+    <!-- Start Recomendated products -->
     <article class="container-fluid bg-light">
         <div class="container">
             <div class="worksingle-related-header row">
                 <h1 class="h2 py-5">Reccomendations</h1>
                 <div class="col-md-12 text-left justify-content-center">
                     <div class="row gx-5">
-                        {% for category in categories %}
-                            {%for product in category.products.all %}
+                        {%for product in recomendated_products%}
                         <div class="col-sm-6 col-lg-4 mb-5">
                             <a href="#" class="related-content card text-decoration-none overflow-hidden h-100">
                                 <img class="related-img card-img-top" src="{{product.cover.url}}" alt="Card image cap">
@@ -295,19 +358,47 @@
                                     <div class="d-flex justify-content-between">
                                         <span class="text-primary light-300">Read more</span>
                                         <div class="light-300">
-                                            <i class='bx-fw bx bx-heart me-1'></i>5
+                                            <i class='bx-fw bx bx-heart me-1'></i>{{product.favorites.all.count}}
                                             <i class='bx-fw bx bx-chat    ms-1 me-1'></i>3
                                         </div>
                                     </div>
                                 </div>
                             </a>
                         </div>
-                            {%endfor%}
                         {%endfor%}
                 </div>
             </div>
     </article>
-    <!-- End Related Post -->
+    <!-- End Recomendated products -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const textarea = document.getElementById('inputmessage');
+    if (textarea) {
+      textarea.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.altKey) {
+          event.preventDefault();
+          this.form.submit();
+        }
+      });
+    }
 
+    const replyModalEl = document.getElementById('replyModal');
+    replyModalEl.addEventListener('show.bs.modal', event => {
+      const btn = event.relatedTarget;
+      const commentId = btn.getAttribute('data-feedback-id'); // comment.id is passed here
+
+      const form = replyModalEl.querySelector('#replyForm');
+
+      // Use Django URL template with dummy ID (0) and replace it
+      const actionTemplate = `{% url 'reply_comment' 0 %}`; // rendered as e.g., /comments/reply/0/
+      const finalAction = actionTemplate.replace('0', commentId);
+
+      form.action = finalAction;
+
+      // Set parent comment ID in the hidden input
+      replyModalEl.querySelector('#parent_id').value = commentId;
+    });
+  });
+</script>
 
 {%endblock%}
