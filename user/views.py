@@ -1,9 +1,7 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
-
-from Booking.models import Feedback, FeedbackResponse
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm,MyUserUpdateForm
 from .models import *
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,22 +9,26 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .services import generate_otp,is_code_valid
 
-
 def login_user(request):
     if request.method == 'POST':
         user = authenticate(email=request.POST['email'],password=request.POST['password'])
         if user:
-            code=generate_otp()
-            OTP.objects.create(user=user,
-            code=code)
-            send_mail(
-                "This is your temporary code from BookkingHolding",
-                f"There your code don't show this code: {code} ",
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
-            return redirect('verify_code',user_id=user.id)
+            if user.is_2fa_enabled:
+                code=generate_otp()
+                OTP.objects.create(user=user,
+                code=code)
+                send_mail(
+                    "This is your temporary code from BookkingHolding",
+                    f"There your code don't show this code: {code} ",
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    fail_silently=False,
+                )
+                return redirect('verify_code',user_id=user.id)
+            else:
+                login(request, user)
+                messages.success('You have been logged in')
+                return redirect('main_page')
         else:
             messages.error(request, 'Invalid username or password')
     return render(request,'user/login.html',{'form':AuthenticationForm()})
@@ -83,3 +85,17 @@ def resend_code(request,user_id):
         fail_silently=False,
     )
     return redirect('verify_code', user_id=user.id)
+
+
+@login_required(login_url='login')
+def profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = MyUserUpdateForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')  # Or wherever you want to go
+    else:
+        form = MyUserUpdateForm(instance=user)
+
+    return render(request, 'user/profile.html', {'form': form})

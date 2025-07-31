@@ -63,7 +63,8 @@ class UserAdmin(BaseUserAdmin):
             'email',
             'avatar',
             'role',
-            'balance')}),
+            'balance'
+            ,'is_2fa_enabled',)}),
         ('Permissions', {'fields': ('is_admin', )}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin

@@ -1,7 +1,8 @@
 from django.contrib import messages
 from .models import *
 from django.shortcuts import render, redirect, get_object_or_404
-
+from .filters import ProductFilter
+from django.core.paginator import Paginator
 
 # Create your views here.
 def main_page(request):
@@ -98,3 +99,13 @@ def delete_reply(request,comment_id,product_id):
         feedback_reply.delete()
         messages.success(request,"Thank You for your comment")
     return redirect('detail_page',product_id=product_id)
+
+def product_list(request):
+    filter = ProductFilter(request.GET, queryset=Product.objects.all())
+    paginator = Paginator(filter.qs, 6)  # 6 products per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'main/products_list.html', {
+        'filter': filter,
+        'page_obj': page_obj
+    })

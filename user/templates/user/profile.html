@@ -1,0 +1,42 @@
+{% extends 'base.html'%}
+{% block content%}
+<div class="container mt-5">
+  <div class="row">
+    <!-- Form on the left -->
+    <div class="col-md-8">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.username.label_tag }} {{ form.username }}
+        </div>
+        <div class="mb-3">
+          {{ form.email.label_tag }} {{ form.email }}
+        </div>
+        <div class="mb-3">
+          {{ form.role.label_tag }} {{ form.role }}
+        </div>
+        <div class="mb-3">
+          {{ form.balance.label_tag }} {{ form.balance }}
+        </div>
+        <div class="mb-3">
+          {{ form.is_2fa_enabled.label_tag }} {{ form.is_2fa_enabled }}
+        </div>
+        <div class="mb-3">
+          {{ form.avatar.label_tag }} {{ form.avatar }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+
+    <!-- Avatar preview on the right -->
+    <div class="col-md-4 text-center">
+      {% if user.avatar %}
+        <img src="{{ user.avatar.url }}" class="img-thumbnail" style="max-width: 200px;" alt="User avatar">
+      {% else %}
+        <img src="#" class="img-thumbnail" style="max-width: 200px;" alt="Default avatar">
+      {% endif %}
+      <p class="mt-2">Current Avatar</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

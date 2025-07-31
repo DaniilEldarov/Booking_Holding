@@ -34,6 +34,9 @@ class MyUser(AbstractBaseUser):
         default=False
     )
     created_date = models.DateTimeField(auto_now_add=True)
+    is_2fa_enabled = models.BooleanField(
+        default=False
+    )
 
     objects = MyUserManager()
 

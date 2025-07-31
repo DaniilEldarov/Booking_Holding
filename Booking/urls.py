@@ -1,4 +1,4 @@
-from .views import main_page,delete_reply,detail_products,favorite,comments,favorite_list,reply_on_comment,delete_comment
+from .views import main_page,product_list,delete_reply,detail_products,favorite,comments,favorite_list,reply_on_comment,delete_comment
 from django.urls import path
 urlpatterns = [
     path('',main_page,name='main_page'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('reply_on_comment/<int:comment_id>',reply_on_comment, name='reply_comment'),
     path('delete_comment/<int:comment_id>/<int:product_id>',delete_comment, name='delete_comment'),
     path('delete_reply/<int:comment_id>/<int:product_id>',delete_reply, name='delete_reply'),
+    path('product_list/', product_list, name='product_list'),
 ]
